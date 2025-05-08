@@ -35,7 +35,7 @@ K, N = 3, 3
 print("Часть 1: сравнение подходов")
 start = datetime.now()
 a_dist = recurs(K, N)
-time_work("Рекурсивный метод", start, datetime.now())
+time_work("Алгоритмический метод", start, datetime.now())
 print(f"Количество вариантов: {len(a_dist)}\nВарианты:\n" + '\n'.join(map(str, a_dist)))
 
 start = datetime.now()
