@@ -18,11 +18,11 @@ class Ellipse:
         self.b = b          # Малая полуось
         self.color = "red"  # Цвет по умолчанию
 
-    # 1. Сегментация — проверка точки (px, py) внутри эллипса
+    # 1. Сегментация 
     def is_inside(self, px, py):
         return ((px - self.x) ** 2 / self.a ** 2) + ((py - self.y) ** 2 / self.b ** 2) <= 1
 
-    # 2. Визуализация на холсте
+    # 2. Визуализация 
     def draw(self, canvas):
         canvas.create_oval(
             self.x - self.a, self.y - self.b,
@@ -78,8 +78,8 @@ class App:
         self.select_button = tk.Button(self.frame, text="Выбрать файл", command=self.choose_file)
         self.select_button.pack(side=tk.LEFT)
 
-        self.ellipses = []  # Список эллипсов
-        self.current_ellipse = None  # Текущий эллипс для работы
+        self.ellipses = []  
+        self.current_ellipse = None 
 
     def choose_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
@@ -111,7 +111,7 @@ class App:
         if not self.current_ellipse:
             messagebox.showwarning("Ошибка", "Сначала загрузите данные.")
             return
-        new_color = "pink"  # Можно сделать выбор цвета через askcolor
+        new_color = "pink" 
         self.current_ellipse.set_color(new_color)
         self.visualize()
 
