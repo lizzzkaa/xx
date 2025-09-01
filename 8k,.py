@@ -5,28 +5,27 @@
 #раскраска
 #перемещение на плоскости
 
-import tkinter as tk #для создания окон
-from tkinter import filedialog#окна для выбора файлов
-from tkinter import messagebox#вывод ошибок
+import tkinter as tk 
+from tkinter import filedialog
+from tkinter import messagebox
 
 # Класс "Эллипс"
 class Ellipse:
-    def __init__(self, x, y, a, b):#устанавливает изначальные значения
-        self.x = x          # Координата X центра
-        self.y = y          # Координата Y центра
-        self.a = a          # Большая полуось
-        self.b = b          # Малая полуось
-        self.color = "red"  # Цвет по умолчанию
-
-    # 1. Сегментация — проверка точки (px, py) внутри эллипса
+    def __init__(self, x, y, a, b):
+        self.x = x       
+        self.y = y   
+        self.a = a      
+        self.b = b          
+        self.color = "red"  
+    # 1. Сегментация 
     def is_inside(self, px, py):
         return ((px - self.x) ** 2 / self.a ** 2) + ((py - self.y) ** 2 / self.b ** 2) <= 1
 
     # 2. Визуализация на холсте
     def draw(self, canvas):
-        canvas.create_oval( #на холсте канвас
-            self.x - self.a, self.y - self.b,#левый верхний угол
-            self.x + self.a, self.y + self.b,#прав ниж
+        canvas.create_oval( 
+            self.x - self.a, self.y - self.b,
+            self.x + self.a, self.y + self.b,
             fill=self.color, outline="black" )
 
     # 3. Раскраска
@@ -46,7 +45,7 @@ class App:
 
         # Холст для отрисовки
         self.canvas = tk.Canvas(root, width=500, height=400, bg="white")
-        self.canvas.pack()#пэк размещает холст в окне рут
+        self.canvas.pack()
 
         # Поля управления
         self.frame = tk.Frame(root)
@@ -71,15 +70,15 @@ class App:
         self.save_button = tk.Button(self.btn_frame, text="Сохранить", command=self.save_to_file)
         self.save_button.grid(row=0, column=4, padx=5)
 
-        self.file_entry = tk.Entry(self.frame, width=30)#поле ввода
+        self.file_entry = tk.Entry(self.frame, width=30)
         self.file_entry.pack(side=tk.LEFT, padx=5)
 
         self.select_button = tk.Button(self.frame, text="Выбрать файл", command=self.choose_file)
         self.select_button.pack(side=tk.LEFT)
 
-        self.current_ellipse = None  # Текущий эллипс для работы
+        self.current_ellipse = None  
 
-    def choose_file(self):#открывает окно выбора файла
+    def choose_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
         if file_path:
             self.file_entry.delete(0, tk.END)
@@ -90,7 +89,7 @@ class App:
         try:
             with open(path, "r") as f:
                 data = f.readline().strip().split(",")
-                if len(data) != 4: #ровно 4 значения
+                if len(data) != 4:
                     raise ValueError("Файл должен содержать 4 числа: x, y, a, b")
                 x, y, a, b = map(int, data)
                 self.current_ellipse = Ellipse(x, y, a, b)
@@ -109,7 +108,7 @@ class App:
         if not self.current_ellipse:
             messagebox.showwarning("Ошибка", "Сначала загрузите данные.")
             return
-        new_color = "pink"  # Можно сделать выбор цвета через askcolor
+        new_color = "pink"
         self.current_ellipse.set_color(new_color)
         self.visualize()
 
@@ -131,8 +130,9 @@ class App:
                 f.write(",".join(map(str, values)))
             messagebox.showinfo("Сохранено", "Данные сохранены в CSV.")
 
-# --- Запуск приложения ---
+# Запуск приложения
 if __name__ == "__main__":
     root = tk.Tk()
     app = App(root)
     root.mainloop()
+
