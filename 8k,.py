@@ -3,55 +3,56 @@
 #Функции:	сегментация
 #визуализация
 #раскраска
-#перемещение на плоскости
-
-import tkinter as tk 
-from tkinter import filedialog
-from tkinter import messagebox
-
-# Класс "Эллипс"
+import tkinter as tk  
+from tkinter import filedialog 
+from tkinter import messagebox 
 class Ellipse:
-    def __init__(self, x, y, a, b):
-        self.x = x       
-        self.y = y   
-        self.a = a      
-        self.b = b          
+    def __init__(self, x, y, a, b):  
+        self.x = x         
+        self.y = y         
+        self.a = a         
+        self.b = b         
         self.color = "red"  
-    # 1. Сегментация 
+
     def is_inside(self, px, py):
-        return ((px - self.x) ** 2 / self.a ** 2) + ((py - self.y) ** 2 / self.b ** 2) <= 1
+        return ((px - self.x)**2 / self.a**2) + ((py - self.y)**2 / self.b**2) <= 1
 
-    # 2. Визуализация на холсте
     def draw(self, canvas):
-        canvas.create_oval( 
-            self.x - self.a, self.y - self.b,
-            self.x + self.a, self.y + self.b,
-            fill=self.color, outline="black" )
+        canvas.create_oval(
+            self.x - self.a, self.y - self.b,  
+            self.x + self.a, self.y + self.b, 
+            fill=self.color, outline="black"  
+        )
 
-    # 3. Раскраска
     def set_color(self, color):
         self.color = color
 
-    # 4. Перемещение на плоскости
     def move(self, dx, dy):
-        self.x += dx
-        self.y += dy
+        self.x += dx  
+        self.y += dy  
 
-# Графический интерфейс
 class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Эллипсы")
 
-        # Холст для отрисовки
         self.canvas = tk.Canvas(root, width=500, height=400, bg="white")
-        self.canvas.pack()
+        self.canvas.pack() 
 
-        # Поля управления
+
+        self.canvas.bind("<Button-1>", self.on_canvas_click) 
+     
         self.frame = tk.Frame(root)
         self.frame.pack(pady=10)
 
-        # Кнопки
+       
+        self.file_entry = tk.Entry(self.frame, width=30)
+        self.file_entry.pack(side=tk.LEFT, padx=5)
+
+   
+        self.select_button = tk.Button(self.frame, text="Выбрать файл", command=self.choose_file)
+        self.select_button.pack(side=tk.LEFT)
+
         self.btn_frame = tk.Frame(root)
         self.btn_frame.pack()
 
@@ -70,69 +71,86 @@ class App:
         self.save_button = tk.Button(self.btn_frame, text="Сохранить", command=self.save_to_file)
         self.save_button.grid(row=0, column=4, padx=5)
 
-        self.file_entry = tk.Entry(self.frame, width=30)
-        self.file_entry.pack(side=tk.LEFT, padx=5)
+        self.current_ellipse = None 
 
-        self.select_button = tk.Button(self.frame, text="Выбрать файл", command=self.choose_file)
-        self.select_button.pack(side=tk.LEFT)
-
-        self.current_ellipse = None  
 
     def choose_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
-        if file_path:
-            self.file_entry.delete(0, tk.END)
-            self.file_entry.insert(0, file_path)
+        path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
+        if path:
+            self.file_entry.delete(0, tk.END)    
+            self.file_entry.insert(0, path)      
 
     def load_from_file(self):
         path = self.file_entry.get()
         try:
-            with open(path, "r") as f:
-                data = f.readline().strip().split(",")
-                if len(data) != 4:
-                    raise ValueError("Файл должен содержать 4 числа: x, y, a, b")
-                x, y, a, b = map(int, data)
-                self.current_ellipse = Ellipse(x, y, a, b)
+            with open(path, "r") as f:                 
+                data = f.readline().strip().split(",")    
+                if len(data) != 4:                      
+                    raise ValueError("Файл: x,y,a,b")
+                x, y, a, b = map(int, data)             
+                self.current_ellipse = Ellipse(x, y, a, b)  
                 messagebox.showinfo("Успех", "Данные загружены.")
         except Exception as e:
-            messagebox.showerror("Ошибка", str(e))
+            messagebox.showerror("Ошибка", str(e)) 
 
     def visualize(self):
         if not self.current_ellipse:
-            messagebox.showwarning("Ошибка", "Сначала загрузите данные.")
+            messagebox.showwarning("Ошибка", "Нет данных.")
             return
-        self.canvas.delete("all")
-        self.current_ellipse.draw(self.canvas)
+        self.canvas.delete("all")          
+        self.current_ellipse.draw(self.canvas)  
 
+  
     def change_color(self):
         if not self.current_ellipse:
-            messagebox.showwarning("Ошибка", "Сначала загрузите данные.")
+            messagebox.showwarning("Ошибка", "Нет данных.")
             return
-        new_color = "pink"
-        self.current_ellipse.set_color(new_color)
-        self.visualize()
+        self.current_ellipse.set_color("pink")  
+        self.visualize()  
 
+    
     def move_shape(self):
         if not self.current_ellipse:
-            messagebox.showwarning("Ошибка", "Сначала загрузите данные.")
+            messagebox.showwarning("Ошибка", "Нет данных.")
             return
-        self.current_ellipse.move(20, -10)
-        self.visualize()
-
+        self.current_ellipse.move(20, -10)  
+        self.visualize()  
+   
     def save_to_file(self):
         if not self.current_ellipse:
-            messagebox.showwarning("Ошибка", "Сначала загрузите данные.")
+            messagebox.showwarning("Ошибка", "Нет данных.")
             return
-        file_path = filedialog.asksaveasfilename(defaultextension=".csv")
-        if file_path:
-            with open(file_path, "w") as f:
+        path = filedialog.asksaveasfilename(defaultextension=".csv")
+        if path:
+            with open(path, "w") as f:
+              
                 values = [self.current_ellipse.x, self.current_ellipse.y, self.current_ellipse.a, self.current_ellipse.b]
                 f.write(",".join(map(str, values)))
-            messagebox.showinfo("Сохранено", "Данные сохранены в CSV.")
+            messagebox.showinfo("Сохранено", "Данные сохранены.")
 
-# Запуск приложения
+   
+    def on_canvas_click(self, event):
+      
+        if not self.current_ellipse:
+            messagebox.showwarning("Ошибка", "Сначала загрузите и нарисуйте эллипс.")
+            return
+
+        px, py = event.x, event.y 
+
+        
+        if self.current_ellipse.is_inside(px, py):
+            color = "green"  
+            msg = "Точка внутри эллипса"
+        else:
+            color = "red" 
+            msg = "Точка снаружи"
+
+       
+        self.canvas.create_oval(px - 3, py - 3, px + 3, py + 3,
+                                fill=color, outline="black", width=1)
+
+
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = App(root)
-    root.mainloop()
-
+    root = tk.Tk()       
+    app = App(root)       
+    root.mainloop()       
