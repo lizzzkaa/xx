@@ -1,0 +1,101 @@
+import pygame, random, sys
+pygame.init()
+CELL, SIZE = 30, 10
+W, H = 650, 350
+screen = pygame.display.set_mode((W, H))
+pygame.display.set_caption("Морской бой")
+font = pygame.font.SysFont(None, 32)
+#РАССТАНОВКА
+def place_ships():
+    board_cells = set()
+    ships = []
+    for size in [4,3,3,2,2,2,1,1,1,1]:
+        placed = False
+        for _ in range(200):
+            h = random.choice([True, False])
+            x = random.randint(0, SIZE - (size if h else 1))
+            y = random.randint(0, SIZE - (size if not h else 1))
+            cells = {(x + (i if h else 0), y + (i if not h else 0)) for i in range(size)}
+            # проверка отступов
+            if all((cx+dx, cy+dy) not in board_cells for cx,cy in cells for dx in (-1,0,1) for dy in (-1,0,1)):
+                ships.append(cells)
+                board_cells |= cells
+                placed = True
+                break
+        if not placed:
+            ships.append(cells); board_cells |= cells
+    return ships
+
+class Board:
+    def __init__(self): self.ships = place_ships(); self.shots = set()
+    def shoot(self, pos):
+        if pos in self.shots: return None
+        self.shots.add(pos)
+        for s in self.ships:
+            if pos in s: return "sunk" if s <= self.shots else "hit"
+        return "miss"
+    def all_sunk(self): return all(s <= self.shots for s in self.ships)
+
+class AI:
+    def __init__(self): self.board = Board(); self.targets = []; self.used = set()
+    def shoot(self):
+        if self.targets: return self.targets.pop()
+        # случайный выстрел по необстрелянным клеткам
+        allp = [(x,y) for x in range(SIZE) for y in range(SIZE) if (x,y) not in self.used]
+        return random.choice(allp) if allp else (0,0)
+    def feedback(self, pos, res):
+        self.used.add(pos)
+        if res == "hit":
+            x,y = pos
+            for dx,dy in [(1,0),(-1,0),(0,1),(0,-1)]:
+                nx,ny = x+dx,y+dy
+                if 0<=nx<SIZE and 0<=ny<SIZE and (nx,ny) not in self.used:
+                    self.targets.append((nx,ny))
+        elif res == "sunk": self.targets.clear()
+
+def draw_board(board, x0, y0, show_ships):
+    for x in range(SIZE):
+        for y in range(SIZE):
+            color = (220,220,220)
+            if (x,y) in board.shots:
+                color = (255,100,100) if any((x,y) in s for s in board.ships) else (100,100,100)
+            elif show_ships and any((x,y) in s for s in board.ships):
+                color = (150,220,150)
+            pygame.draw.rect(screen, color, (x0+x*CELL, y0+y*CELL, CELL, CELL))
+            pygame.draw.rect(screen, (0,0,0), (x0+x*CELL, y0+y*CELL, CELL, CELL), 1)
+
+player = Board()
+ai = AI()
+game_over = False
+winner = None
+clock = pygame.time.Clock()
+
+while True:
+    screen.fill((240,240,240))
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT: pygame.quit(); sys.exit()
+        if game_over and e.type == pygame.KEYDOWN:
+            player, ai = Board(), AI(); game_over = False
+        elif not game_over and e.type == pygame.MOUSEBUTTONDOWN:
+            mx, my = e.pos
+            if W//2 <= mx < W//2 + SIZE*CELL and 0 <= my < SIZE*CELL:
+                gx, gy = (mx - W//2) // CELL, my // CELL
+                if 0 <= gx < SIZE and 0 <= gy < SIZE:
+                    res = ai.board.shoot((gx, gy))
+                    if res and ai.board.all_sunk(): game_over, winner = True, "player"
+                    elif res:
+                        ai_pos = ai.shoot()
+                        ai_res = player.shoot(ai_pos)
+                        ai.feedback(ai_pos, ai_res)
+                        if player.all_sunk(): game_over, winner = True, "ai"
+
+    draw_board(player, 10, 10, True)
+    draw_board(ai.board, W//2, 10, False)
+
+    if game_over:
+        msg = "Победа!" if winner == "player" else "Поражение!"
+        txt = font.render(msg, True, (0,0,0))
+        screen.blit(txt, (W//2 - txt.get_width()//2, H - 40))
+
+    pygame.display.flip()
+    clock.tick(60)
