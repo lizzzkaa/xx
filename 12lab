@@ -67,7 +67,7 @@ class Game:
         self.status.grid(row=0, column=0, columnspan=22)
         tk.Label(f, text="Мой флот").grid(row=1, column=0, columnspan=10)
         tk.Label(f, text="Флот противника").grid(row=1, column=12, columnspan=10)
-        # Создаём разделительный столбец
+        # создаём разделительный столбец
         f.grid_columnconfigure(10, minsize=30)
         self.p_btns, self.e_btns = [], []
         for y in range(SIZE):
