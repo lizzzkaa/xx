@@ -1,10 +1,11 @@
-import pygame, random, sys
+import pygame, random
 pygame.init()
 CELL, SIZE = 30, 10
 W, H = 650, 350
 screen = pygame.display.set_mode((W, H))
 pygame.display.set_caption("Морской бой")
 font = pygame.font.SysFont(None, 32)
+
 #РАССТАНОВКА
 def place_ships():
     board_cells = set()
@@ -73,7 +74,7 @@ clock = pygame.time.Clock()
 while True:
     screen.fill((240,240,240))
     for e in pygame.event.get():
-        if e.type == pygame.QUIT: pygame.quit(); sys.exit()
+        if e.type == pygame.QUIT: pygame.quit(); exit()  # ← изменено
         if game_over and e.type == pygame.KEYDOWN:
             player, ai = Board(), AI(); game_over = False
         elif not game_over and e.type == pygame.MOUSEBUTTONDOWN:
