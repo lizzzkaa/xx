@@ -32,12 +32,11 @@ class MazeGame:
         self.moving = False
         self.remaining = self.time_limit
         self.timer_label.config(text="Время: -- с")
-        self.player_pos = (1, 1)
-        self.exit_pos = (self.cols - 2, self.rows - 2)
+        # ИЗМЕНЕНО. убрали фиксированные точки для паучка и выхода
         self.generate_maze()
         self.draw_maze()
         self.draw_player()
-        self.canvas.delete("trail")  # удаляем старые следы
+        self.canvas.delete("trail")
 
     def generate_maze(self): #создает лабиринт
         self.maze = [[True for _ in range(self.cols)] for _ in range(self.rows)]
@@ -53,26 +52,40 @@ class MazeGame:
                     dfs(nx, ny)
 
         dfs(1, 1)
-        self.maze[1][1] = False
-        self.maze[self.exit_pos[1]][self.exit_pos[0]] = False
 
-    def draw_maze(self): #рисует лабиринт
+        # ИЗМЕНЕНО. собираем все проходы и выбираем случайный старт и выход
+        passages = []
+        for y in range(1, self.rows - 1):
+            for x in range(1, self.cols - 1):
+                if not self.maze[y][x]:
+                    passages.append((x, y))
+
+        if len(passages) >= 2:
+            self.exit_pos = random.choice(passages) #рандомный выход
+            start_candidates = [p for p in passages if p != self.exit_pos]
+            self.player_pos = random.choice(start_candidates) #рандомный старт
+        else:
+            # на случай ошибки — оставляем как было
+            self.player_pos = (1, 1)
+            self.exit_pos = (self.cols - 2, self.rows - 2)
+
+    def draw_maze(self): #рисует лабиринт ИЗМНЕНЕНО. старт и выход больше не вручную
+        #делаются проходами, а изначально выбираются из свободных клеток
         self.canvas.delete("all")
         for y in range(self.rows):
             for x in range(self.cols):
                 cx, cy = x * self.cell_size, y * self.cell_size
-                if self.maze[y][x]:  # стена → чёрный кубик
+                if self.maze[y][x]:
                     self.canvas.create_rectangle(
                         cx, cy, cx + self.cell_size, cy + self.cell_size,
                         fill="black", outline=""
                     )
-        # Надпись "Выход"
         ex, ey = self.exit_pos
         cx = ex * self.cell_size + self.cell_size // 2
         cy = ey * self.cell_size + self.cell_size // 2
         self.canvas.create_text(cx, cy, text="Выход", fill="red", font=("Arial", 12, "bold"))
 
-    def draw_player(self): #рисует паука
+    def draw_player(self): #рисует паучка
         if hasattr(self, '_player_id'):
             self.canvas.delete(self._player_id)
         x, y = self.player_pos
@@ -99,7 +112,7 @@ class MazeGame:
         msg = "Ура, паучок выбрался!" if win else "Паучок проиграл(("
         messagebox.showinfo("Победа!" if win else "Проигрыш", msg)
 
-    def start_dfs(self): #запуск движения паука
+    def start_dfs(self): #запуск движения
         if self.moving or self.game_over:
             return
         self.moving = True
@@ -108,7 +121,7 @@ class MazeGame:
         self.visited = {self.player_pos}
         self.dfs_step()
 
-    def dfs_step(self): #движение паука
+    def dfs_step(self): #движение
         if self.game_over or not self.moving:
             return
         if not self.stack:
@@ -118,7 +131,6 @@ class MazeGame:
         self.player_pos = current
         self.draw_player()
 
-        # ЧЁРНАЯ ТОЧКА — след там, где паук побывал
         x, y = current
         cx = x * self.cell_size + self.cell_size // 2
         cy = y * self.cell_size + self.cell_size // 2
@@ -140,11 +152,11 @@ class MazeGame:
                     neighbors.append((nx, ny))
 
         if neighbors:
-            next_cell = random.choice(neighbors) #рандомный выбор свободного прохода
+            next_cell = random.choice(neighbors)
             self.visited.add(next_cell)
             self.stack.append(next_cell)
         else:
-            self.stack.pop()  # возврат из тупика
+            self.stack.pop()
 
         self.root.after(200, self.dfs_step)
 
