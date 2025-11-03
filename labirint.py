@@ -38,7 +38,8 @@ class MazeGame:
         self.draw_player()
         self.canvas.delete("trail")
 
-    def generate_maze(self): #создает лабиринт
+    def generate_maze(self): #создает лабиринт ИЗМНЕНЕНО. старт и выход больше не вручную
+        #делаются проходами, а изначально выбираются из свободных клеток
         self.maze = [[True for _ in range(self.cols)] for _ in range(self.rows)]
 
         def dfs(x, y):
@@ -69,8 +70,7 @@ class MazeGame:
             self.player_pos = (1, 1)
             self.exit_pos = (self.cols - 2, self.rows - 2)
 
-    def draw_maze(self): #рисует лабиринт ИЗМНЕНЕНО. старт и выход больше не вручную
-        #делаются проходами, а изначально выбираются из свободных клеток
+    def draw_maze(self): #рисует лабиринт 
         self.canvas.delete("all")
         for y in range(self.rows):
             for x in range(self.cols):
@@ -164,3 +164,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     game = MazeGame(root, cols=21, rows=15, cell_size=30, time_limit_sec=40)
     root.mainloop()
+
