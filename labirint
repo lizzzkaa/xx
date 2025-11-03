@@ -25,7 +25,7 @@ class MazeGame:
 
         self.reset_game()
 
-    def reset_game(self):
+    def reset_game(self): #сброс игры 
         if hasattr(self, 'moving') and self.moving:
             return
         self.game_over = False
@@ -39,7 +39,7 @@ class MazeGame:
         self.draw_player()
         self.canvas.delete("trail")  # удаляем старые следы
 
-    def generate_maze(self):
+    def generate_maze(self): #создает лабиринт
         self.maze = [[True for _ in range(self.cols)] for _ in range(self.rows)]
 
         def dfs(x, y):
@@ -56,7 +56,7 @@ class MazeGame:
         self.maze[1][1] = False
         self.maze[self.exit_pos[1]][self.exit_pos[0]] = False
 
-    def draw_maze(self):
+    def draw_maze(self): #рисует лабиринт
         self.canvas.delete("all")
         for y in range(self.rows):
             for x in range(self.cols):
@@ -72,7 +72,7 @@ class MazeGame:
         cy = ey * self.cell_size + self.cell_size // 2
         self.canvas.create_text(cx, cy, text="Выход", fill="red", font=("Arial", 12, "bold"))
 
-    def draw_player(self):
+    def draw_player(self): #рисует паука
         if hasattr(self, '_player_id'):
             self.canvas.delete(self._player_id)
         x, y = self.player_pos
@@ -84,7 +84,7 @@ class MazeGame:
             fill="black", outline="white", width=1
         )
 
-    def tick_timer(self):
+    def tick_timer(self): #таймер 
         if not self.game_over:
             self.remaining = max(0, self.remaining - 1)
             self.timer_label.config(text=f"Время: {self.remaining:02d} с")
@@ -93,13 +93,13 @@ class MazeGame:
         if not self.game_over:
             self.root.after(1000, self.tick_timer)
 
-    def end_game(self, win):
+    def end_game(self, win): #завершение игры
         self.game_over = True
         self.moving = False
         msg = "Ура, паучок выбрался!" if win else "Паучок проиграл(("
         messagebox.showinfo("Победа!" if win else "Проигрыш", msg)
 
-    def start_dfs(self):
+    def start_dfs(self): #запуск движения паука
         if self.moving or self.game_over:
             return
         self.moving = True
@@ -108,7 +108,7 @@ class MazeGame:
         self.visited = {self.player_pos}
         self.dfs_step()
 
-    def dfs_step(self):
+    def dfs_step(self): #движение паука
         if self.game_over or not self.moving:
             return
         if not self.stack:
